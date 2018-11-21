@@ -1,0 +1,56 @@
+# The TA will give some tips about the project based on students' questions
+
+# python 3 problem
+the grammar of python2 and python3 is similiar to each other. You can write your code in python 3 first, then submit it. The submission system will give you feed back if there is any grammar mistake in your code. After modification, you can submit again. There is no penalty for re-submit before deadline.
+
+# availabel packages in the server:
+adium-theme-ubuntu (0.3.4)
+appdirs (1.4.3)
+backports.weakref (1.0.post1)
+bleach (1.5.0)
+decorator (4.0.6)
+enum34 (1.1.6)
+funcsigs (1.0.2)
+futures (3.2.0)
+html5lib (0.9999999)
+Markdown (2.6.10)
+mock (2.0.0)
+numpy (1.13.3)
+packaging (16.8)
+pbr (3.1.1)
+Pillow (3.1.2)
+pip (9.0.1)
+protobuf (3.5.0.post1)
+pyparsing (2.2.0)
+scipy (1.0.0)
+setuptools (38.2.4)
+six (1.11.0)
+tensorflow (1.4.1)
+tensorflow-tensorboard (0.4.0rc3)
+unity-lens-photos (1.0)
+Werkzeug (0.13)
+wheel (0.30.0)
+
+# neagetive value in validation.npy
+Reason: to reduce the size of validation.npy, I used dtype as unit8, instead of int32 when saving the file. The value will be negative when you read it as int32, if the original value is bigger than 128.
+Solution: convert it to uint8, for example:
+
+tmp = np.load("validation").item()
+a = tmp["reshaped"][0].astype(np.unit8)
+
+# there are some typos in the specification, I have corrected them with blue color text.
+
+# marking rule
+the score is comprised of two part
+one part is for your successful building a model that works, which is 8 points. Every one with accuracy than 2%(exclude)
+will get the 8 points.
+the remaining 12 point come from the accuracy, with 4% for one point. Since even random guess will get 4% accuracy, so 
+you will not get accuracy point if your accuracy is lower than or equals to 4%. The smallest mark is 0.5
+
+In a word, your score will be
+0					if accuracy <=2% or you didn't submit sucessfully
+8					if accuracy among (2%, 4%]
+8 + int((acc - 4)/2)/2			if accuracy among (4%, 52%)
+20					if accuracy >=52%
+
+

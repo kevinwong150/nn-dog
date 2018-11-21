@@ -1,0 +1,5 @@
+data/
+main/__pycache__
+train_origin*
+train_reshaped*
+MNIST_data*
