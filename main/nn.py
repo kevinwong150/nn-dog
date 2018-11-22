@@ -18,11 +18,11 @@ RANDOM_SEED = 1
 LEARNING_RATE = 0.03
 (BATCH_SIZE, BATCH_LIST, TOTAL_TRAIN_BATCH) = (None, None, None)
 AUGMENTATION_METHOD = [
-    util.augmentation_identity,
     util.augmentation_flip,
     util.augmentation_translate,
     util.augmentation_rotate,
-    util.augmentation_blur
+    util.augmentation_blur,
+    util.augmentation_identity
     ]
 TOTAL_AUGMENTATION_METHOD = len(AUGMENTATION_METHOD)
 PROGRAM_START_TIME = time.time()
