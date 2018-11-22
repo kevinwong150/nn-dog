@@ -17,6 +17,14 @@ def meanNormalize(train_data_array, batch_size):
     mean_normalized_array = np.asarray(mean_normalized_list)
     return mean_normalized_array
 
+# set constant for deviding training batch 
+def setBatch(batch_size, total_train_batch):
+    batch_list = []
+    for i in range(total_train_batch):
+        batch_list.append(batch_size*(i+1))
+    return (batch_size, batch_list, total_train_batch)
+
+
 # Data Augmentation -------------------------------------------------------------------------
 # return image itself (no augmentation)
 def augmentation_identity(image):
@@ -85,10 +93,47 @@ def onehot_row_to_label(y_predict):
 def onehot_to_label(y_predict):
     return np.apply_along_axis(onehot_row_to_label, 1, y_predict)
 
-def writeInfo(filepath, loop, num):
-    if loop % num != 0:
+# Return 2D array of onehot prediction result
+def prediction(X, y, theta, interval=(1, 1)):
+    if (not isInterval(interval)):
         return
 
+    input_layer = withBiasColumn(X) # (TOTAL_DATA, 30001)
+    hidden_layer_2 = sigmoid(np.dot(input_layer,theta[0].T)) # (TOTAL_DATA, 3000)
+    hidden_layer_2 = withBiasColumn(hidden_layer_2) # (TOTAL_DATA, 3001)
+    hidden_layer_3 = sigmoid(np.dot(hidden_layer_2,theta[1].T)) # (TOTAL_DATA, 300)
+    hidden_layer_3 = withBiasColumn(hidden_layer_3) # (TOTAL_DATA, 301)
+    output_layer = sigmoid(np.dot(hidden_layer_3,theta[2].T)) # (TOTAL_DATA, 25)
+
+    return output_layer # (TOTAL_DATA, 25)
+
+# Return accuracy of nn result
+def get_accuracy(output, y, TOTAL_DATA, interval=(1, 1)):
+    if (not isInterval(interval)):
+        return
+
+    prediction = onehot_to_label(nn_output_to_onehot(output))
+    return np.sum(prediction == y) / TOTAL_DATA
+
+# Debug Utilities ------------------------------------------------------------------------
+
+# Return boolean
+def isInterval(interval):
+    (loop, num) = interval
+    return (loop % num == 0)
+
+# Print debug message
+def debug(str, interval=(1, 1)):
+    if (not isInterval(interval)):
+        return
+    print(str)
+
+# File Output Utilities ------------------------------------------------------------------------
+def writeInfo(filepath, interval=(1, 1)):
+    if (not isInterval(interval)):
+        return
+
+    (loop, num) = interval
     loop = loop + 1
 
     exists = os.path.isfile(filepath)
@@ -108,8 +153,8 @@ def writeInfo(filepath, loop, num):
         file.write("Epoch Trained: " + str(loop) + "\n")
         file.close()
 
-def saveTheta(theta, filepath, loop, num):
-    if loop % num != 0:
+def saveTheta(theta, filepath, interval=(1, 1)):
+    if (not isInterval(interval)):
         return
 
     exists = os.path.isfile(filepath)
@@ -118,31 +163,3 @@ def saveTheta(theta, filepath, loop, num):
 
     Theta_temp = np.asarray(theta)
     np.save(filepath, Theta_temp)
-
-def debug(str, loop=1, num=1):
-    if loop % num != 0:
-        return
-    print(str)
-
-# Return 2D array of onehot prediction result
-def prediction(X, y, theta, loop=1, num=1):
-    if loop % num != 0:
-        return
-
-    input_layer = withBiasColumn(X) # (TOTAL_DATA, 30001)
-    hidden_layer_2 = sigmoid(np.dot(input_layer,theta[0].T)) # (TOTAL_DATA, 3000)
-    hidden_layer_2 = withBiasColumn(hidden_layer_2) # (TOTAL_DATA, 3001)
-    hidden_layer_3 = sigmoid(np.dot(hidden_layer_2,theta[1].T)) # (TOTAL_DATA, 300)
-    hidden_layer_3 = withBiasColumn(hidden_layer_3) # (TOTAL_DATA, 301)
-    output_layer = sigmoid(np.dot(hidden_layer_3,theta[2].T)) # (TOTAL_DATA, 25)
-
-    return output_layer # (TOTAL_DATA, 25)
-
-# Return accuracy of nn result
-def get_accuracy(output, y, TOTAL_DATA, loop=1, num=1):
-    if loop % num != 0:
-        return
-
-    prediction = onehot_to_label(nn_output_to_onehot(output))
-
-    return np.sum(prediction == y) / TOTAL_DATA

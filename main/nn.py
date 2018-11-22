@@ -16,9 +16,7 @@ TOTAL_TRAIN_DATA = None
 TOTAL_TEST_DATA = None
 RANDOM_SEED = 1
 LEARNING_RATE = 0.03
-BATCH_SIZE = 1000
-BATCH_LIST = [BATCH_SIZE, 2*BATCH_SIZE, 3*BATCH_SIZE]
-TRAIN_BATCH = len(BATCH_LIST)
+(BATCH_SIZE, BATCH_LIST, TOTAL_TRAIN_BATCH) = (None, None, None)
 AUGMENTATION_METHOD = [
     util.augmentation_identity,
     util.augmentation_flip,
@@ -28,6 +26,7 @@ AUGMENTATION_METHOD = [
     ]
 TOTAL_AUGMENTATION_METHOD = len(AUGMENTATION_METHOD)
 PROGRAM_START_TIME = time.time()
+DEBUG_EPOCH_INTERVAL = 5
 
 INPUT_LAYER = 30000
 LAYER_2 = 3000
@@ -65,7 +64,6 @@ train_data_array = np.load(TRAIN_DATA_PATH)
 # Get total # of data
 (TOTAL_TRAIN_DATA, _) = train_label_onehot.shape
 
-
 # Input layer = 30000 features + 1 bias
 # Output Layer = 25 class
 # Designed neural network = 4 layer = 30001 + 3001 + 301 + 25
@@ -88,18 +86,22 @@ else:
     print("Initialize theta.")
 
 total_iteration = 0
+(BATCH_SIZE, BATCH_LIST, TOTAL_TRAIN_BATCH) = util.setBatch(TOTAL_TRAIN_DATA, 1)
+
 for epoch in range(10000):
 
     start_time = time.time()
 
     util.debug("Epoch #" + str(epoch))
 
+    DEBUG_EPOCH = (epoch, DEBUG_EPOCH_INTERVAL)
+
     # Name the variable for epoch training
     Theta = [theta_1, theta_2, theta_3]
     X = train_data_array
     y = train_label_onehot
 
-    util.debug("Shuffle and get batch", epoch, 5)
+    util.debug("Shuffle and get batch", DEBUG_EPOCH)
     shuffle_order = np.arange(TOTAL_TRAIN_DATA)
     np.random.shuffle(shuffle_order)
     X_shuffle = X[shuffle_order]
@@ -109,10 +111,12 @@ for epoch in range(10000):
     train_label_shuffle = train_label[shuffle_order]
     train_label_batch = np.split(train_label_shuffle, BATCH_LIST) # batch size = (1000 , 1000, 1000, 1728)
 
-    for iteration in range(TRAIN_BATCH):
+    for iteration in range(TOTAL_TRAIN_BATCH):
+
+        DEBUG_ITERATION = (total_iteration, DEBUG_EPOCH_INTERVAL * TOTAL_TRAIN_BATCH)
 
         # Data Augmentation
-        util.debug("Data augmentation and preprocessing", total_iteration, 15)
+        util.debug("Data augmentation and preprocessing", DEBUG_ITERATION)
         operaion = np.random.randint(TOTAL_AUGMENTATION_METHOD, size=(BATCH_SIZE))
         for data_number in range(BATCH_SIZE):
             data = X_batch[iteration][data_number]
@@ -124,7 +128,7 @@ for epoch in range(10000):
         X_batch[iteration] = util.meanNormalize(X_batch[iteration], BATCH_SIZE)
 
         # Forward propagation
-        util.debug("Forward propagation", total_iteration, 15)
+        util.debug("Forward propagation", DEBUG_ITERATION)
         input_layer = util.withBiasColumn(X_batch[iteration]) # (BATCH_SIZE, 30001)
         hidden_layer_2 = util.sigmoid(np.dot(input_layer,theta_1.T)) # (BATCH_SIZE, 3000)
         hidden_layer_2 = util.withBiasColumn(hidden_layer_2) # (BATCH_SIZE, 3001)
@@ -133,22 +137,22 @@ for epoch in range(10000):
         output_layer = util.sigmoid(np.dot(hidden_layer_3,theta_3.T)) # (BATCH_SIZE, 25)
 
         # Predict Accuracy of Train Data
-        train_accuracy = util.get_accuracy(output_layer, train_label_batch[iteration], BATCH_SIZE, total_iteration, 15)
-        util.debug("Predict Train Data Accuracy = " + str(train_accuracy), total_iteration, 15)
+        train_accuracy = util.get_accuracy(output_layer, train_label_batch[iteration], BATCH_SIZE, DEBUG_ITERATION)
+        util.debug("Predict Train Data Accuracy = " + str(train_accuracy), DEBUG_ITERATION)
 
         # Predict Accuracy of Test Data
-        util.debug("Predict Test Data", total_iteration, 15)
-        prediction = util.prediction(test_data_array, test_label_onehot, Theta, total_iteration, 15)
-        test_accuracy = util.get_accuracy(prediction, test_label, TOTAL_TEST_DATA, total_iteration, 15)
-        util.debug("Predict Test Data Accuracy = " + str(test_accuracy), total_iteration, 15)
+        util.debug("Predict Test Data", DEBUG_ITERATION)
+        prediction = util.prediction(test_data_array, test_label_onehot, Theta, DEBUG_ITERATION)
+        test_accuracy = util.get_accuracy(prediction, test_label, TOTAL_TEST_DATA, DEBUG_ITERATION)
+        util.debug("Predict Test Data Accuracy = " + str(test_accuracy), DEBUG_ITERATION)
 
         # Compute output error
         output_layer_error = y_batch[iteration] - util.nn_output_to_onehot(output_layer) # (BATCH_SIZE, 25)
         cost = util.cost(output_layer, y_batch[iteration], BATCH_SIZE) # (1,) (scalar)
-        util.debug("Cost: " + str(cost), total_iteration, 15)
+        util.debug("Cost: " + str(cost), DEBUG_ITERATION)
 
         # Backward propagation
-        util.debug("Backward propagation", total_iteration, 15)
+        util.debug("Backward propagation", DEBUG_ITERATION)
         hidden_layer_3_error = np.multiply(
                                 np.dot(output_layer_error, theta_3), # (BATCH_SIZE, 301)
                                 util.sigmoid(util.withBiasColumn(np.dot(hidden_layer_2, theta_2.T)), True) # (BATCH_SIZE, 301)
@@ -175,11 +179,11 @@ for epoch in range(10000):
 
         total_iteration = total_iteration + 1
 
-    util.debug("Save Theta", epoch, 5)
+    util.debug("Save Theta", DEBUG_EPOCH)
     Theta = [theta_1, theta_2, theta_3]
-    util.saveTheta(Theta, TRAIN_THETA_PATH, epoch, 5)
-    util.writeInfo(TRAIN_INFO_PATH, epoch, 5)
+    util.saveTheta(Theta, TRAIN_THETA_PATH, DEBUG_EPOCH)
+    util.writeInfo(TRAIN_INFO_PATH, DEBUG_EPOCH)
     # a = np.load('../data/trained_theta.npy')
 
-    util.debug("Time for epoch " + str(epoch) + " = " + str(time.time() - start_time) + " seconds", epoch, 5)
-    util.debug("Total program time = " + str((time.time() - PROGRAM_START_TIME)/60) + " minutes", epoch, 5)
+    util.debug("Time for epoch " + str(epoch) + " = " + str(time.time() - start_time) + " seconds", DEBUG_EPOCH)
+    util.debug("Total program time = " + str((time.time() - PROGRAM_START_TIME)/60) + " minutes", DEBUG_EPOCH)
