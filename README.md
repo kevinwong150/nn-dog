@@ -3,22 +3,23 @@
 ###### This is derived from the project of CSCI3230 . This project is using the data set from the project of CSCI3230.
 
 ## Program description:
-/main/nn.py : the main for training, modify the #Configurable to adjust the result
-/main/util.py : util library for the preprocess and training phase
-/main/preprocess.py : program that generate the training data and labels, which can also be downloaded from the link below
-/main/test.py : just my playground program to test some function, useless to training and preprocess
+/main/nn.py : the main for training, modify the #Configurable to adjust the result  
+/main/util.py : util library for the preprocess and training phase  
+/main/preprocess.py : program that generate the training data and labels, which can also be downloaded from the link below  
+/main/test.py : just my playground program to test some function, useless to training and preprocess  
 
 ## Link to data set: 
 https://mycuhk-my.sharepoint.com/:f:/g/personal/1155063445_link_cuhk_edu_hk/Eg7YyOwbJxpHp6USzQjgINoB2DdoaTYfEd0cTNL9SaP8Mw?e=ot6sT5
 ## How to start:
 **Step 1:**  
-Download it to the root directory of the repository and extract it. It should contain data/testing.npy, data/train_data_array.npy and data/train_data_onehot.npy.  
+Download the above data set to the root directory of the repository and extract it. It should contain data/testing.npy, data/train_data_array.npy and data/train_data_onehot.npy.  
 **Step 2:**  
 Remove the data/trained_theta.npy and data/training_info.txt as your will. These files will be regenerated in the training process.  
 **Step 3:**  
 cd to /main and run nn.py. Some message will then show up.  
 **Step 4:**  
 Base on the rough result, do step 2 again and try to adjust and config to see the effect on training and testing.  
+![console output](https://i.imgur.com/B7Y3WDG.png)  
 **Step 5:**  
 Enjoy!  
 
