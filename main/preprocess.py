@@ -6,6 +6,7 @@ import util
 import time
 
 # Constant
+TOTAL_CLASS = 25
 RAW_TRAIN_DATA_PATH = "../train_reshaped/"
 RAW_TRAIN_LABEL_PATH = "../train_label.txt"
 
