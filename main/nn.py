@@ -6,16 +6,15 @@ import random
 import util
 import time
 
-# Constant
+# Constant, modify the constant to adjust the training of neural network
 theta_1 = None
 theta_2 = None
 theta_3 = None
 Theta = [theta_1, theta_2, theta_3]
-TOTAL_CLASS = 25
 TOTAL_TRAIN_DATA = None
 TOTAL_TEST_DATA = None
-RANDOM_SEED = 1
-LEARNING_RATE = 0.03
+RANDOM_SEED = 1 # Configurable
+LEARNING_RATE = 0.03 # Configurable
 (BATCH_SIZE, BATCH_LIST, TOTAL_TRAIN_BATCH) = (None, None, None)
 AUGMENTATION_METHOD = [
     util.augmentation_flip,
@@ -23,15 +22,16 @@ AUGMENTATION_METHOD = [
     util.augmentation_rotate,
     util.augmentation_blur,
     util.augmentation_identity
-    ]
+    ] # Configurable
 TOTAL_AUGMENTATION_METHOD = len(AUGMENTATION_METHOD)
 PROGRAM_START_TIME = time.time()
-DEBUG_EPOCH_INTERVAL = 5
+DEBUG_EPOCH_INTERVAL = 5 # Configurable
 
-INPUT_LAYER = 30000
-LAYER_2 = 3000
-LAYER_3 = 300
-OUTPUT_LAYER = 25
+TOTAL_CLASS = 25 # Configurable
+INPUT_LAYER = 30000 # Configurable
+LAYER_2 = 3000 # Configurable
+LAYER_3 = 300 # Configurable
+OUTPUT_LAYER = TOTAL_CLASS
 
 TEST_DATA_PATH = "../data/testing.npy"
 TRAIN_DATA_PATH = "../data/train_data_array.npy"
@@ -50,7 +50,7 @@ test_label_onehot = np.asarray(test_label_onehot) # (250, 25)
 (TOTAL_TEST_DATA, _) = test_label_onehot.shape
 
 test_data_array = (Dictionary['reshaped'])
-test_data_array = list(map(lambda x: x.flatten(), test_data_array))
+test_data_array = list(map(lambda x: x.astype(np.uint8).flatten(), test_data_array))
 test_data_array = np.asarray(test_data_array) # (250, 30000)
 test_data_array_mean = np.sum(test_data_array, axis=0)/TOTAL_TEST_DATA
 test_data_array = list(map(lambda x: (x - test_data_array_mean) / 255, test_data_array.tolist()))
@@ -86,7 +86,9 @@ else:
     print("Initialize theta.")
 
 total_iteration = 0
-(BATCH_SIZE, BATCH_LIST, TOTAL_TRAIN_BATCH) = util.setBatch(TOTAL_TRAIN_DATA, 1)
+
+# adjust the batch-size and batch number for training, (maximum batch size = TOTAL_TRAIN_DATA, maximun batch number * batch size <= TOTAL_TRAIN_DATA)
+(BATCH_SIZE, BATCH_LIST, TOTAL_TRAIN_BATCH) = util.setBatch(1000, 3) # Configurable
 
 for epoch in range(10000):
 
@@ -105,11 +107,11 @@ for epoch in range(10000):
     shuffle_order = np.arange(TOTAL_TRAIN_DATA)
     np.random.shuffle(shuffle_order)
     X_shuffle = X[shuffle_order]
-    X_batch = np.split(X_shuffle, BATCH_LIST) # batch size = (1000 , 1000, 1000, 1728)
+    X_batch = np.split(X_shuffle, BATCH_LIST) # batch size = (1000, 1000, 1000, 1728)
     y_shuffle = y[shuffle_order]
-    y_batch = np.split(y_shuffle, BATCH_LIST) # batch size = (1000 , 1000, 1000, 1728)
+    y_batch = np.split(y_shuffle, BATCH_LIST) # batch size = (1000, 1000, 1000, 1728)
     train_label_shuffle = train_label[shuffle_order]
-    train_label_batch = np.split(train_label_shuffle, BATCH_LIST) # batch size = (1000 , 1000, 1000, 1728)
+    train_label_batch = np.split(train_label_shuffle, BATCH_LIST) # batch size = (1000, 1000, 1000, 1728)
 
     for iteration in range(TOTAL_TRAIN_BATCH):
 
@@ -178,6 +180,7 @@ for epoch in range(10000):
         theta_3 = theta_3 + LEARNING_RATE * theta_3_delta
 
         total_iteration = total_iteration + 1
+        util.debug("Iteration Complete", DEBUG_ITERATION)
 
     util.debug("Save Theta", DEBUG_EPOCH)
     Theta = [theta_1, theta_2, theta_3]
