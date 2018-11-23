@@ -30,7 +30,7 @@ DEBUG_EPOCH_INTERVAL = 5 # Configurable
 TOTAL_CLASS = 25 # Configurable
 INPUT_LAYER = 30000 # Configurable
 LAYER_2 = 3000 # Configurable
-LAYER_3 = 300 # Configurable
+LAYER_3 = 800 # Configurable
 OUTPUT_LAYER = TOTAL_CLASS
 
 TEST_DATA_PATH = "../data/testing.npy"
